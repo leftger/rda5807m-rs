@@ -1,0 +1,165 @@
+config:
+  register_address_type: u8
+  default_byte_order: LE
+  default_register_access: RW
+  default_field_access: RW
+
+ChipId:
+  type: register
+  address: 0
+  size_bits: 16
+  access: RO
+  fields:
+    chip_id:
+      base: uint
+      access: RO
+      start: 8
+      end: 15
+
+GeneralControl:
+  type: register
+  address: 0x02
+  size_bits: 16
+  fields:
+    enable:
+      description: "Power Up Enable. 0: Power Down, 1: Power Up"
+      base: bool
+      start: 0
+    soft_reset:
+      description: "Soft Reset. 0: No Reset, 1: Reset"
+      base: bool
+      start: 1
+    new_method:
+      description: "New Demodulate Method Enable, can improve the receive sensitivity about 1dB."
+      base: bool
+      start: 2
+    rds_en:
+      description: "RDS Enable. 0: RDS Disable, 1: RDS Enable"
+      base: bool
+      start: 3
+    clk_mode:
+      base: uint
+      start: 4
+      end: 7
+      try_conversion:
+        name: ClkMode
+        kHz32_768: 0b000
+        MHz12: 0b001
+        MHz13: 0b010
+        MHz19_2: 0b011
+        Reserved1: 0b100
+        MHz24: 0b101
+        MHz26: 0b110
+        MHz38_4: 0b111
+    sk_mode:
+      description: "0 = wrap at the upper or lower band limit and continue seeking, 1 = stop seeking at the upper or lower band limit"
+      base: bool
+      start: 7
+    seek:
+      description: "0 = Disable stop seek, 1 = Enable"
+      base: bool
+      start: 8
+    seekup:
+      description: "0 = Seek Down, 1 = Seek Up"
+      base: bool
+      start: 9
+    rclk_direct_input_mode:
+      base: bool
+      start: 10
+    rclk_non_calibrated_mode:
+      base: bool
+      start: 11
+    bass:
+      base: bool
+      start: 12
+    mono:
+      description: "0 = Stereo, 1 = Force Mono"
+      base: bool
+      start: 13
+    dmute:
+      description: "0 = Mute, 1 = Normal Operation"
+      base: bool
+      start: 14
+    dhiz:
+      description: "0 = Audio Output HiZ, 1 = Normal Operation"
+      base: bool
+      start: 15
+
+ChannelTuning:
+  type: register
+  address: 0x03
+  size_bits: 16
+  fields:
+    space:
+      base: uint
+      start: 0
+      end: 2
+      try_conversion:
+        name: Space
+        kHz100: 0b00
+        kHz200: 0b01
+        kHz50: 0b10
+        kHz25: 0b11
+    band:
+      base: uint
+      start: 2
+      end: 4
+      try_conversion:
+        name: Band
+        description: "00 = USA/Europe +87MHz, 01 = Japan +76MHz, 10 = WorldWide +76MHz, 11 = EastEurope +65MHz"
+        USAEurope: 0b00
+        Japan: 0b01
+        WorldWide: 0b10
+        EastEurope: 0b11
+    tune:
+      base: bool
+      start: 4
+    direct_mode:
+      base: bool
+      start: 5
+    chan:
+      description: "Channel Spacing (kHz) x CHAN + band offset"
+      base: uint
+      start: 6
+      end: 16
+
+AudioControl:
+  type: register
+  address: 0x04
+  size_bits: 16
+  fields:
+    afcd:
+      description: "AFC Disable. 0: AFC Enable, 1: AFC Disable"
+      base: bool
+      start: 8
+    softmute_en:
+      description: "Soft Mute Enable. 0: Soft Mute Disable, 1: Soft Mute Enable"
+      base: bool
+      start: 9
+    deemphasis:
+      description: "Deemphasis. 0: 75µs, 1: 50µs"
+      base: bool
+      start: 11
+
+VolumeAndControl:
+  type: register
+  address: 0x05
+  size_bits: 16
+  fields:
+    volume:
+      base: uint
+      description: "Volume Control (0-15)"
+      start: 0
+      end: 4
+    seek_threshold:
+      base: uint
+      description: "Seek SNR Threshold Value (0-15)"
+      start: 8
+      end: 12
+    interrupt_mode:
+      base: bool
+      description: "Interrupt Mode. 0: Generate 5ms Interrupt, 1: Interrupt Until Reg0Ch Action Occurs"
+      start: 15
+
+
+      
