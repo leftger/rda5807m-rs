@@ -83,8 +83,10 @@ jobs:
           components: clippy
       - uses: Swatinem/rust-cache@v2
       - run: cargo clippy ${{ env.CLIPPY_ARGS }} -- -W clippy::all
-      - run: rustup target add ${{ env.NO_STD_TARGET }}
-      - run: cargo clippy --lib ${{ env.NO_STD_CARGO_ARGS }} --target ${{ env.NO_STD_TARGET }} -- -W clippy::all
+      - if: ${{ env.NO_STD_TARGET != '' }}
+        run: rustup target add ${{ env.NO_STD_TARGET }}
+      - if: ${{ env.NO_STD_TARGET != '' }}
+        run: cargo clippy --lib ${{ env.NO_STD_CARGO_ARGS }} --target ${{ env.NO_STD_TARGET }} -- -W clippy::all
 
   test:
     name: Test
