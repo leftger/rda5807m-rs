@@ -1,3 +1,5 @@
+#![no_std]
+
 device_driver::create_device!(
     device_name: Rda5807m,
     manifest: "manifests/rda5807m.yaml"
@@ -35,7 +37,7 @@ where
     pub fn set_volume(&mut self, volume: u8) -> Result<(), E> {
         let vol = volume.min(15);
         self.volume_and_control().modify(|w| {
-            w.set_volume(vol.try_into().unwrap());
+            w.set_volume(vol);
         })
     }
 
@@ -125,7 +127,9 @@ where
         };
 
         let chan = if freq_khz >= base_freq_khz {
-            ((freq_khz - base_freq_khz) / spacing_khz).try_into().unwrap()
+            ((freq_khz - base_freq_khz) / spacing_khz)
+                .try_into()
+                .unwrap()
         } else {
             0.try_into().unwrap()
         };
@@ -196,7 +200,7 @@ where
     /// Read Received Signal Strength Indicator (RSSI) value (0..127).
     pub fn get_rssi(&mut self) -> Result<u8, E> {
         let status2 = self.status_2().read()?;
-        Ok(status2.rssi().try_into().unwrap_or(0))
+        Ok(status2.rssi())
     }
 
     /// Check if the currently tuned channel is a valid station.
@@ -214,15 +218,15 @@ where
     /// Read Chip ID (expected 0x58).
     pub fn read_chip_id(&mut self) -> Result<u8, E> {
         let chip_id_reg = self.chip_id().read()?;
-        Ok(chip_id_reg.chip_id().try_into().unwrap_or(0))
+        Ok(chip_id_reg.chip_id())
     }
 
     /// Read RDS blocks (Block A, Block B, Block C, Block D).
     pub fn read_rds_blocks(&mut self) -> Result<(u16, u16, u16, u16), E> {
-        let block_a = self.rds_data_0().read()?.block_a().try_into().unwrap_or(0);
-        let block_b = self.rds_data_1().read()?.block_b().try_into().unwrap_or(0);
-        let block_c = self.rds_data_2().read()?.block_c().try_into().unwrap_or(0);
-        let block_d = self.rds_data_3().read()?.block_d().try_into().unwrap_or(0);
+        let block_a = self.rds_data_0().read()?.block_a();
+        let block_b = self.rds_data_1().read()?.block_b();
+        let block_c = self.rds_data_2().read()?.block_c();
+        let block_d = self.rds_data_3().read()?.block_d();
         Ok((block_a, block_b, block_c, block_d))
     }
 }

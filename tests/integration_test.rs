@@ -1,6 +1,6 @@
+use rda5807m_rs::{Band, ClkMode, Rda5807m, Space};
 use std::cell::RefCell;
 use std::rc::Rc;
-use rda5807m_rs::{Band, ClkMode, Rda5807m, Space};
 
 #[derive(Clone)]
 struct SharedMockI2cBus {
