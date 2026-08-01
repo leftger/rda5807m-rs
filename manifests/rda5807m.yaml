@@ -1,20 +1,21 @@
 config:
   register_address_type: u8
-  default_byte_order: LE
+  default_byte_order: BE
   default_register_access: RW
   default_field_access: RW
 
 ChipId:
   type: register
-  address: 0
+  address: 0x00
   size_bits: 16
   access: RO
   fields:
     chip_id:
+      description: "Chip ID. Default value 0x58"
       base: uint
       access: RO
       start: 8
-      end: 15
+      end: 16
 
 GeneralControl:
   type: register
@@ -64,12 +65,15 @@ GeneralControl:
       base: bool
       start: 9
     rclk_direct_input_mode:
+      description: "1 = RCLK clock use the directly input mode"
       base: bool
       start: 10
     rclk_non_calibrated_mode:
+      description: "1 = RCLK clock is not always supplied when FM works"
       base: bool
       start: 11
     bass:
+      description: "Bass Boost. 0 = Disabled, 1 = Enabled"
       base: bool
       start: 12
     mono:
@@ -106,19 +110,21 @@ ChannelTuning:
       end: 4
       try_conversion:
         name: Band
-        description: "00 = USA/Europe +87MHz, 01 = Japan +76MHz, 10 = WorldWide +76MHz, 11 = EastEurope +65MHz"
+        description: "00 = USA/Europe 87-108MHz, 01 = Japan 76-91MHz, 10 = WorldWide 76-108MHz, 11 = EastEurope 65-76MHz or 50-76MHz"
         USAEurope: 0b00
         Japan: 0b01
         WorldWide: 0b10
-        EastEurope: 0b11
+        EastEuropeOrExtended: 0b11
     tune:
+      description: "0 = Disable, 1 = Enable tune operation"
       base: bool
       start: 4
     direct_mode:
+      description: "Directly Control Mode, only used when test"
       base: bool
       start: 5
     chan:
-      description: "Channel Spacing (kHz) x CHAN + band offset"
+      description: "Channel Select CHAN[9:0]. Frequency = Channel Spacing (kHz) x CHAN + band offset"
       base: uint
       start: 6
       end: 16
@@ -148,12 +154,12 @@ VolumeAndControl:
   fields:
     volume:
       base: uint
-      description: "Volume Control (0-15)"
+      description: "DAC Gain Control / Volume (0-15)"
       start: 0
       end: 4
     seek_threshold:
       base: uint
-      description: "Seek SNR Threshold Value (0-15)"
+      description: "Seek SNR Threshold Value (0-15). Default 8 is approx 32dB SNR"
       start: 8
       end: 12
     interrupt_mode:
@@ -161,5 +167,176 @@ VolumeAndControl:
       description: "Interrupt Mode. 0: Generate 5ms Interrupt, 1: Interrupt Until Reg0Ch Action Occurs"
       start: 15
 
+OpenReservedMode:
+  type: register
+  address: 0x06
+  size_bits: 16
+  fields:
+    open_mode:
+      base: uint
+      description: "Open reserved register mode. 0b11 = open behind registers writing function; others = only open behind registers reading"
+      start: 13
+      end: 15
 
-      
+SystemControl2:
+  type: register
+  address: 0x07
+  size_bits: 16
+  fields:
+    freq_mode:
+      base: bool
+      description: "If 1, then frequency setting changed"
+      start: 0
+    softblend_en:
+      base: bool
+      description: "If 1, Softblend enable (default 1)"
+      start: 1
+    seek_th_old:
+      base: uint
+      description: "Seek threshold for old seek mode"
+      start: 2
+      end: 8
+    mode_65m_50m:
+      base: bool
+      description: "Valid when band = 0b11. 1: 65-76MHz, 0: 50-76MHz"
+      start: 9
+    th_softblend:
+      base: uint
+      description: "Threshold for noise soft blend setting, unit 2dB (default 0b10000)"
+      start: 10
+      end: 15
+
+Status1:
+  type: register
+  address: 0x0A
+  size_bits: 16
+  access: RO
+  fields:
+    readchan:
+      base: uint
+      access: RO
+      description: "Read Channel. Current channel frequency index CHAN[9:0]"
+      start: 0
+      end: 10
+    st:
+      base: bool
+      access: RO
+      description: "Stereo Indicator. 0 = Mono, 1 = Stereo"
+      start: 10
+    blk_e:
+      base: bool
+      access: RO
+      description: "When RDS enable: 1 = block id of reg 0xC, 0xD, 0xE, 0xF is E"
+      start: 11
+    rdss:
+      base: bool
+      access: RO
+      description: "RDS Synchronization"
+      start: 12
+    sf:
+      base: bool
+      access: RO
+      description: "Seek Fail. 1 = seek operation failed to find a station"
+      start: 13
+    stc:
+      base: bool
+      access: RO
+      description: "Seek/Tune Complete. 1 = operation complete"
+      start: 14
+    rdsr:
+      base: bool
+      access: RO
+      description: "RDS Ready. 1 = RDS group ready"
+      start: 15
+
+Status2:
+  type: register
+  address: 0x0B
+  size_bits: 16
+  access: RO
+  fields:
+    blerb:
+      base: uint
+      access: RO
+      description: "Block Errors Level of RDS_DATA_1 / Block B"
+      start: 0
+      end: 2
+    blera:
+      base: uint
+      access: RO
+      description: "Block Errors Level of RDS_DATA_0 / Block A"
+      start: 2
+      end: 4
+    abcd_e:
+      base: bool
+      access: RO
+      description: "1 = block id of register 0x0C, 0x0D, 0x0E, 0x0F is E"
+      start: 4
+    fm_ready:
+      base: bool
+      access: RO
+      description: "1 = ready"
+      start: 7
+    fm_true:
+      base: bool
+      access: RO
+      description: "1 = current channel is a station"
+      start: 8
+    rssi:
+      base: uint
+      access: RO
+      description: "Received Signal Strength Indicator RSSI[6:0]"
+      start: 9
+      end: 16
+
+RdsData0:
+  type: register
+  address: 0x0C
+  size_bits: 16
+  access: RO
+  fields:
+    block_a:
+      base: uint
+      access: RO
+      description: "RDS Block A / RDS_DATA_0"
+      start: 0
+      end: 16
+
+RdsData1:
+  type: register
+  address: 0x0D
+  size_bits: 16
+  access: RO
+  fields:
+    block_b:
+      base: uint
+      access: RO
+      description: "RDS Block B / RDS_DATA_1"
+      start: 0
+      end: 16
+
+RdsData2:
+  type: register
+  address: 0x0E
+  size_bits: 16
+  access: RO
+  fields:
+    block_c:
+      base: uint
+      access: RO
+      description: "RDS Block C / RDS_DATA_2"
+      start: 0
+      end: 16
+
+RdsData3:
+  type: register
+  address: 0x0F
+  size_bits: 16
+  access: RO
+  fields:
+    block_d:
+      base: uint
+      access: RO
+      description: "RDS Block D / RDS_DATA_3"
+      start: 0
+      end: 16

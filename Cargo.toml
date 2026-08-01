@@ -6,6 +6,9 @@ authors = ["Gerzain Mata <leftger@gmail.com>"]
 repository = "https://github.com/leftger/rda5807-rs"
 license = "MIT OR Apache-2.0"
 readme = "README.md"
+exclude = [
+    "docs/",
+]
 
 [dependencies]
 device-driver = "1.0.7"
